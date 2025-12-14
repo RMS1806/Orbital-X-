@@ -56,36 +56,19 @@ Icons: Lucide React
 
 🚀 Installation & Setup
 
-Clone the Repository
-
+1. Clone the Repository
 git clone [https://github.com/kshgrshrn/ORBITAL-X.git](https://github.com/kshgrshrn/ORBITAL-X.git)
 cd orbital-x
 
 
-Install Dependencies
-
+2.Install Dependencies
 npm install
 
-
-Configure Environment
+3.Configure Environment
 Create a .env file in the root directory:
 
-VITE_GEMINI_API_KEY=your_google_gemini_key_here
+4.VITE_GEMINI_API_KEY=your_google_gemini_key_here
 
-
-Run the Application
-
+5.Run the Application
 npm run dev
 
-
-👥 Team
-
-Rajit Mohan Shrivastava - Project Lead & Integration
-
-Kushagra Sharan - AI/ML Architect
-
-Mahek Gupta - Strategy & Frontend
-
-Kshitiz Goyal - Backend & Data
-
-Anshul Das - Data Scientist
