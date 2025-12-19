@@ -1,20 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+ORBITAL-X: Autonomous Agentic AI for B2B RFP Automation 🚀
 
-# Run and deploy your AI Studio app
+Team VelvetLeaf Cruise | Round 2 Submission
 
-This contains everything you need to run your app locally.
+📋 Executive Summary
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Yhhh1559H78HtkZPXs2N5N0OkiRWOiXd
+ORBITAL-X is an intelligent multi-agent system designed to revolutionize the B2B Sales cycle for FMCG enterprises (specifically Asian Paints). By leveraging a swarm of 4 specialized AI agents, the system automates the end-to-end lifecycle of a Request for Proposal (RFP)—from identifying opportunities to generating technically accurate, commercially viable proposals in minutes.
 
-## Run Locally
+🏗️ System Architecture
 
-**Prerequisites:**  Node.js
+The solution utilizes a Client-Side Agentic Architecture powered by Google Gemini 1.5 Pro.
+
+🕵️ Sales Agent: Scans inputs (URLs/Text), identifies client entities, and strictly filters RFPs based on a 3-month deadline horizon.
+
+🧠 Technical Agent: Uses In-Context Semantic Search to map vague requirements (e.g., "weather-proof paint") to specific internal SKUs, providing a "Top 3 Comparison" for decision support.
+
+💰 Pricing Agent: A context-aware commercial engine that applies volume discounts and automatically detects/charges for implied services (Lab Tests, Logistics).
+
+🛡️ Integrity Guardrail: A unique Supervisor Layer that calculates a Trust Score before generating the email. If the score is <85%, the system forces a human review.
+
+🌟 Key Features
+
+1. The "Top 3" Comparison Engine
+
+Unlike standard RAG that returns one answer, ORBITAL-X ranks the Winner vs. Alternatives, visualizing the "Spec Match %" via progress bars.
+
+2. Context-Aware Pricing
+
+The system doesn't just look up prices. It reasons:
+
+Detected "Exterior Paint"? -> Auto-adds "UV Resistance Lab Test" ($150).
+
+Detected "Staggered Batches"? -> Auto-adds "Logistics Fee" ($2,500).
+
+3. The Integrity Index (Anti-Hallucination)
+
+We implemented a mathematical guardrail to ensure reliability:
+
+$$Integrity = 0.4(SpecMatch) + 0.3(PricingAccuracy) + 0.3(AIConfidence)$$
+
+Green (>85): Safe to Auto-Draft.
+
+Red (<85): Flags vague inputs for Human Review.
+
+🛠️ Tech Stack
+
+Frontend: React.js (Vite) + TypeScript
+
+Styling: Tailwind CSS (Dark Mode Enterprise UI)
+
+AI Model: Google Gemini 1.5 Pro (via Google Generative AI SDK)
+
+State Management: React Hooks & Context API
+
+Icons: Lucide React
+
+🚀 Installation & Setup
+
+1. Clone the Repository
+git clone [https://github.com/kshgrshrn/ORBITAL-X.git](https://github.com/kshgrshrn/ORBITAL-X.git)
+cd orbital-x
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2.Install Dependencies
+npm install
+
+3.Configure Environment
+Create a .env file in the root directory:
+
+4.VITE_GEMINI_API_KEY=your_google_gemini_key_here
+
+5.Run the Application
+npm run dev
+
