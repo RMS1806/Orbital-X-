@@ -1,86 +1,58 @@
-import { BaseAgent } from './BaseAgent';
-import { RFPAnalysis, LogEntry } from '../types';
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export class RFPIdentificationAgent extends BaseAgent {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+// 1. Initialize the Google GenAI Client
+// We use import.meta.env to access Vite environment variables
+const apiKey = import.meta.env.VITE_GOOGLE_GENAI_API_KEY;
 
-  constructor(onLog: (entry: LogEntry) => void) {
-    super('RFP-ID-AGENT', onLog);
-    
-    // 1. FIX: Use Vite's environment variable (Critical for Browser/React)
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("❌ API Key missing! Make sure VITE_GOOGLE_GENAI_API_KEY is in your .env.local file.");
+}
 
-    if (!apiKey) {
-      this.log('CRITICAL: VITE_GEMINI_API_KEY is missing.', 'error');
-      throw new Error("API Key missing");
-    }
+const genAI = new GoogleGenerativeAI(apiKey);
 
-    this.genAI = new GoogleGenerativeAI(apiKey);
+// Use 'gemini-1.5-flash' for speed/cost or 'gemini-1.5-pro' for complex reasoning
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // 2. UPDATE: Using the model you see in Studio (gemini-2.5-flash)
-    this.model = this.genAI.getGenerativeModel({
-      model: "gemini-2.5-flash", 
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            client_name: { type: SchemaType.STRING },
-            submission_deadline: { type: SchemaType.STRING },
-            contact_email: { type: SchemaType.STRING },
-            product_requirements: { 
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING }
-            },
-            priority_score: { type: SchemaType.INTEGER }
-          },
-          required: ["client_name", "submission_deadline", "contact_email", "product_requirements", "priority_score"]
-        }
-      }
-    });
-  }
+export interface RFPEvaluation {
+  isRelevant: boolean;
+  score: number; // 0 to 100
+  reasoning: string;
+}
 
-  async analyze(rfpText: string): Promise<RFPAnalysis> {
-    this.log('Initializing analysis sequence...', 'info');
-    
-    try {
-      this.log('Sending payload to Gemini 2.5 Flash...', 'info');
+export const analyzeRFP = async (rfpText: string): Promise<RFPEvaluation> => {
+  try {
+    const prompt = `
+      You are an expert RFP (Request for Proposal) analyst. 
+      Analyze the following RFP content and determine if it is relevant for a software development agency specializing in AI and Web Dev.
       
-      const result = await this.model.generateContent(`
-        Analyze the following RFP text and extract key details. 
-        If the contact email is missing, STRICTLY return 'procurement@client.com'.
-        
-        RFP Text:
-        ${rfpText}
-      `);
+      RFP Content:
+      "${rfpText.slice(0, 5000)}" 
+      
+      Respond STRICTLY in this JSON format:
+      {
+        "isRelevant": boolean,
+        "score": number,
+        "reasoning": "short explanation"
+      }
+    `;
 
-      const text = result.response.text();
-      if (!text) throw new Error("Empty response from AI");
+    // 2. Generate Content
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-      const data = JSON.parse(text) as RFPAnalysis;
+    // 3. Clean and Parse JSON (Gemini sometimes adds markdown backticks)
+    const cleanedText = text.replace(/```json|```/g, "").trim();
+    const data = JSON.parse(cleanedText);
 
-      if (!data.contact_email) data.contact_email = 'procurement@client.com';
+    return data;
 
-      this.log(`Identified Client: ${data.client_name}`, 'success');
-      return data;
-
-    } catch (error: any) {
-      this.log(`Analysis failed: ${error.message}`, 'error');
-      throw error;
-    }
-  }
-
-  // ... (Keep your scanUrl function exactly as it was) ...
-  async scanUrl(url: string): Promise<RFPAnalysis> {
-     // ... existing mock logic ...
-     return {
-        client_name: 'Nexus Health Systems',
-        submission_deadline: new Date(Date.now() + 12096e5).toDateString(),
-        contact_email: 'procurement@nexushealth.com',
-        product_requirements: ["5000 Liters of Anti-Bacterial Interior Paint"],
-        priority_score: 92
+  } catch (error) {
+    console.error("Error analyzing RFP with Gemini:", error);
+    return {
+      isRelevant: false,
+      score: 0,
+      reasoning: "Error analyzing document."
     };
   }
-}
+};
